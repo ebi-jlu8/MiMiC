@@ -40,6 +40,13 @@
 		done
 
 
+# Check if any required arguments are missing
+if [ -z "$input_fna" ] || [ -z "$PfamPath" ] || [ -z "$Type" ]; then
+    echo "Error: Missing required arguments."
+    echo "Usage: $0 -i <input_fna> -d <PfamPath> -t <Type>"
+    exit 1
+fi
+
 #****** creating directory for output ***************************
 
 if [ ! -d output_faa ]; then
