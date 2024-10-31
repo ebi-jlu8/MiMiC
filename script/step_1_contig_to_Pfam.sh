@@ -61,9 +61,9 @@ fi
 
 #******************  path for tools *****************************************
 #Prodigal
-ProdigalPath_cmd=prodigal #added to path
+ProdigalPath_cmd="singularity exec $SINGULARITY_CACHEDIR/quay.io_microbiome-informatics_prodigal:2.6.3.sif prodigal" 
 #hmmscan
-hmmscanPath=hmmscan #added to path
+hmmscanPath=/hps/software/users/rdf/metagenomics/service-team/software/hmmer/3.4/hmmscan
 
 # running script for each genome or metagenome
 
