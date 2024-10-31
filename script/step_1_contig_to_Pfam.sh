@@ -3,9 +3,11 @@
 #last update Feb 2021
 #use : bash metagenome_pipeline.sh
 #
+# updates by JLu Oct 2024
 #*********************************************#
 #tools requirement :
 
+#for MGnify internal use, used prodigal from singularity and Hmmr from hps.
 #3.Prodigal
 #4.Hmmer
 #5.Pfam database
@@ -40,35 +42,43 @@
 
 #****** creating directory for output ***************************
 
-	mkdir output_faa
-	mkdir output_pfam
-	mkdir output_fna
+if [ ! -d output_faa ]; then
+  mkdir output_faa
+fi
+if [ ! -d output_pfam ]; then
+  mkdir output_pfam
+fi
+if [ ! -d output_fna ]; then
+  mkdir output_fna
+fi
 
 #******************  path for tools *****************************************
 #Prodigal
-	ProdigalPath=prodigal
+ProdigalPath_cmd=prodigal #added to path
 #hmmscan
-	hmmscanPath=hmmscan
+hmmscanPath=hmmscan #added to path
 
 # running script for each genome or metagenome
 
-	for i in `cat $input_fna/filenames.txt`; # each sample generate two samples R1 and R2. sample names should be the same. only sufix in the file should be different. 
+for i in $input_fna/*.fna;  
 		do
-			echo $i
-
+    # Extract the base filename without suffix and extension
+    filename=$(basename "$i")          # Get the file name
+    sample_name=$(echo "$filename" | sed 's/.fna//')  # Remove the suffix (_R1 or _R2) and the .fna extension
+    echo "$filename"
 
 #prodigal --> gene prediction
-			$ProdigalPath -i $input_fna$i -p $Type -a output_faa/$i.faa -c -m -q -f sco -d output_fna/$i.fna	
-			echo "$i	prodigal finished">>output_faa/Prodigallogfile.txt
-			ProteinCount=$(grep -c "^" output_faa/'$i'.faa) #-------------- Counting proteins
+			$ProdigalPath_cmd  -i $input_fna/"$filename" -p $Type -a output_faa/"$sample_name".faa -c -m -q -f sco -d output_fna/"$sample_name".fna	
+			echo "$i	prodigal finished">>output_faa/Prodigal.log
+			ProteinCount=$(grep -c "^" output_faa/'$sample_name'.faa) #-------------- Counting proteins
 		
 			echo -e "'$i'\t$ProteinCount" >> output_faa/protein_Count.txt 
-			echo "$i	hmmscan started">>output_pfam/hmmscan_logfile.txt
+			echo "$i	hmmscan started">>output_pfam/hmmscan.log
 
 #hmmscan ----> pfam prediction
 	
 			$hmmscanPath --cpu 20 --acc --noali --cut_ga --tblout  output_pfam/$i.faa.table_results $PfamPath/Pfam-A_2019.hmm   output_faa/$i.faa
-			echo "$i	hmmscan finished" >> output_pfam/hmmscan_logfile.txt	
+			echo "$i	hmmscan finished" >> output_pfam/hmmscan.log
 
 		done
 
@@ -84,7 +94,7 @@ echo -e "processing is finished \n\n"
 
 #http://hmmer.org/
 
-#Pfam data base
+
 
 
 
